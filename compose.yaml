@@ -1,0 +1,19 @@
+name: gitlab-runner-template
+
+services:
+  gitlab-runners:
+    image: gitlab/gitlab-runner:latest
+    volumes:
+      # mount local docker socket to the container to allow the runner to spin up containers during pipelines executions
+      # container created during pipelines are considered sibling containers, this is not DinD
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/gitlab-runner
+    restart: unless-stopped
+    deploy:
+      replicas: 3 # number of runners to spin up
+
+# Create new project/group runner
+# 1. Exec into the container's shell with `docker exec -it <container_name/id> bash`
+# 2. Gitlab instance should be the self-hosted endpoint (e.g. https://gitlab.<company-domain>.com)
+# 3. Executor should be 'docker'
+# 4. Default image can be any image, i usually use 'busybox:latest' (only used when no images are specified in the .gitlab.ci file)
